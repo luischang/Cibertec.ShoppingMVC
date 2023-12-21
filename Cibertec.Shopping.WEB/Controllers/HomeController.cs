@@ -1,4 +1,5 @@
 ﻿using Cibertec.Shopping.WEB.Models;
+using Cibertec.Shopping.WEB.Utils;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -15,6 +16,8 @@ namespace Cibertec.Shopping.WEB.Controllers
 
         public IActionResult Index()
         {
+            var userResult = TempData.Get<UserResultViewModel>("UserResult");
+            ViewData["UserResult"] = userResult;
             return View();
         }
 

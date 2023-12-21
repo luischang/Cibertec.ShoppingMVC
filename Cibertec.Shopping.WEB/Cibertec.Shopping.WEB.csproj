@@ -6,4 +6,17 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="7.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Areas\HumanResources\Controllers\" />
+    <Folder Include="Areas\HumanResources\Data\" />
+    <Folder Include="Areas\HumanResources\Models\" />
+    <Folder Include="Areas\HumanResources\Views\" />
+    <Folder Include="Areas\Logistics\Data\" />
+    <Folder Include="Areas\Logistics\Models\" />
+  </ItemGroup>
+
 </Project>

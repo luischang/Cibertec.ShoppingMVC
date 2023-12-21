@@ -1,0 +1,60 @@
+﻿@{
+    ViewData["Title"] = "Product List";
+}
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+<link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Description</th>
+            <th>Image</th>
+            <th>Stock</th>
+            <th>Price</th>
+            <th>Discount</th>
+            <th>Category</th>
+        </tr>
+    </thead>
+
+    <tbody id="productList"> 
+
+    </tbody>
+
+</table>
+
+<script>
+    loadProducts()
+
+
+    function loadProducts(){
+        var productListEndpoint = "http://localhost:5261/api/Product";
+        var token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiUGVkcm8gR2FsbGVzZSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6ImdhbGxlc2VAcGVydS5jb20iLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9kYXRlb2ZiaXJ0aCI6IjUvMDMvMTk5MyAwMDowMDowMCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2NvdW50cnkiOiJQRVJVIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiVXNlciIsIlVzZXJJZCI6IjIxIiwibmJmIjoxNzAzMTI4OTc2LCJleHAiOjE3MDMxMjk1NzYsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTI2MSIsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTI2MSJ9.SGbiGfUMA5t44C9yu0WsnO0M_g7-YCy3G3h22rSDrGo";//localStorage.getItem("UserResult").
+        $.ajax({
+            url: productListEndpoint,
+            type: "GET",
+            headers: {
+                'Authorization': 'Bearer ' + token
+            },
+            success: function (dataProducts){
+                console.log("Products.....")
+                var productList = $("#productList");
+
+                $.each(dataProducts.data, function(index, product){
+                    var row = $('<tr>');
+                    $('<td>').text(product.id).appendTo(row);
+                    $('<td>').text(product.description).appendTo(row);
+                    $('<td>').text(product.imageUrl).appendTo(row);
+                    $('<td>').text(product.stock).appendTo(row);
+                    $('<td>').text(product.price).appendTo(row);
+                    $('<td>').text(product.discount).appendTo(row);
+                    $('<td>').text(product.category.description).appendTo(row);
+
+                    productList.append(row);
+                });
+            }
+        });    
+    }
+
+
+</script>
