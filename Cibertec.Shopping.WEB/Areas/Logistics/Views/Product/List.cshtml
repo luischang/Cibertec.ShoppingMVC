@@ -2,7 +2,7 @@
     ViewData["Title"] = "Product List";
 }
 
-<table class="table table-bordered">
+<table id="productTable" class="table table-bordered">
     <thead>
         <tr>
             <th>ID</th>
@@ -12,6 +12,8 @@
             <th>Price</th>
             <th>Discount</th>
             <th>Category</th>
+            <th></th>
+            <th></th>
         </tr>
     </thead>
 
@@ -20,8 +22,135 @@
 
 </table>
 
+<!-- Modal Edit Product -->
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Edit Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editProductId" name="editProductId" value="" />
+                <label for="description">Description:</label>
+                <input type="text" id="editDescription" name="editDescription" class="form-control" required />
+
+                <label for="description">Image URL:</label>
+                <input type="text" id="editImageUrl" name="editImageUrl" class="form-control" required />
+
+                <label for="stock">Stock:</label>
+                <input type="number" id="editStock" name="editStock" class="form-control" required />
+
+                <label for="price">Price:</label>
+                <input type="number" id="editPrice" name="editPrice" class="form-control" required />
+
+                <label for="stock">Discount %:</label>
+                <input type="number" id="editDiscount" name="editDiscount" class="form-control" required />
+
+                <label for="stock">Category:</label>
+                <select id="editCategory" name="editCategory" class="form-control" required></select>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="btnSaveEditProduct">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Delete Confirm Product -->
+<div class="modal fade" id="deleteProductModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Deleting...</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h4>¿Está seguro de eliminar este producto?</h4>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="btnSaveDeleteProduct">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    loadProducts()
+    loadProducts();
+
+    $("#btnSaveDeleteProduct").click(function () {
+        var productId = $("#editProductId").val();
+
+        var deleteProductEndpoint = 'http://localhost:5261/api/Product/' + productId;
+        var token = JSON.parse(localStorage.getItem("UserResult")).data.token;
+        console.log("deleteProductEndpoint--> " + deleteProductEndpoint)
+        $.ajax({
+            url: deleteProductEndpoint,
+            type: 'DELETE',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            },
+            success: function (data) {
+                console.log("Product deleted succesfully");
+
+                $("#deleteProductModal").modal('hide');
+
+                loadProducts();
+            },
+            error: function(error){
+                console.log("Error deleting product..")
+            }
+        });
+    });
+
+
+    $("#btnSaveEditProduct").click(function () {
+        let productId = $("#editProductId").val();
+        let description = $("#editDescription").val();
+        let imageUrl = $("#editImageUrl").val();
+        let stock = $("#editStock").val();
+        let price = $("#editPrice").val();
+        let discount = $("#editDiscount").val();
+        let categoryId = $("#editCategory").val();
+
+        var productData = {
+            "id": productId,
+            "description": description,
+            "imageUrl": imageUrl,
+            "stock": stock,
+            "price": price,
+            "discount": discount,
+            "categoryId": categoryId
+        }
+
+        var updateProductEndpoint = "http://localhost:5261/api/Product/" + productId;
+
+        var token = JSON.parse(localStorage.getItem("UserResult")).data.token;
+
+        $.ajax({
+            url: updateProductEndpoint,
+            type: 'PUT',
+            contentType: 'application/json',
+            data: JSON.stringify(productData),
+            headers: {
+                'Authorization': 'Bearer ' + token
+            },
+            success: function (data) {
+                console.log("Product updated successfully");
+
+                $("#editProductModal").modal('hide');
+
+                loadProducts();
+            },
+            error: function (error) {
+                console.log("Error updating product: " + error);
+            }
+        });
+
+    });
 
 
     function loadProducts() {
@@ -44,7 +173,7 @@
                     $('<td>').text(product.description).appendTo(row);
 
                     var imageData = $('<td>');
-                    $('<img>').attr('src', product.imageUrl).css({'width': '30px', 'height' : '30px'}).appendTo(imageData);
+                    $('<img>').attr('src', product.imageUrl).css({ 'width': '30px', 'height': '30px' }).appendTo(imageData);
                     imageData.appendTo(row);
 
                     //$('<td>').text(product.imageUrl).appendTo(row);
@@ -53,10 +182,69 @@
                     $('<td>').text(product.discount).appendTo(row);
                     $('<td>').text(product.category.description).appendTo(row);
 
+                    var editButton = $('<button>').addClass('btn btn-primary').attr('data-toggle', 'modal')
+                        .attr('data-target', '#editProductModal').on('click', function () {
+                            fillEditModal(product);
+                        });
+                    $('<span>').text('Editar').appendTo(editButton);
+                    $('<td>').append(editButton).appendTo(row);
+
+                    var deleteButton = $('<button>').addClass('btn btn-danger').attr('data-toggle', 'modal')
+                        .attr('data-target', '#deleteProductModal').on('click', function () {
+                            fillDeleteModal(product);                            
+                        });
+                    $('<span>').text('Eliminar').appendTo(deleteButton);
+                    $('<td>').append(deleteButton).appendTo(row);
+
                     productList.append(row);
                 });
+                $("#productTable").DataTable();
             }
         });
+    }
+
+    function fillDeleteModal(product){
+        $("#editProductId").val(product.id);
+        $("#deleteProductModal").modal('show');
+    }
+
+    function fillEditModal(product) {
+        $("#editProductId").val(product.id);
+        $("#editImageUrl").val(product.imageUrl);
+        $("#editDescription").val(product.description);
+        $("#editStock").val(product.stock);
+        $("#editPrice").val(product.price);
+        $("#editDiscount").val(product.discount);
+
+        loadCategories(product.category.id);
+
+        $("#editProductModal").modal('show');
+    }
+
+    function loadCategories(selectedCategoryId) {
+        var categoryDropdown = $("#editCategory")
+        var categoryEndpoint = "http://localhost:5261/api/Category";
+
+        $.ajax({
+            url: categoryEndpoint,
+            type: "GET",
+            success: function (dataCategories) {
+                categoryDropdown.empty();
+                $.each(dataCategories.data, function (index, category) {
+                    categoryDropdown.append($('<option>', {
+                        value: category.id,
+                        text: category.description,
+                        selected: (category.id == selectedCategoryId)
+                    }));
+                });
+            },
+            error: function (error) {
+                console.error("Error al cargar las categorias....", error);
+            }
+        });
+
+
+
     }
 
 
