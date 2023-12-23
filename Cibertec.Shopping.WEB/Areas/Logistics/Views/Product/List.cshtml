@@ -1,0 +1,63 @@
+﻿@{
+    ViewData["Title"] = "Product List";
+}
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Description</th>
+            <th>Image</th>
+            <th>Stock</th>
+            <th>Price</th>
+            <th>Discount</th>
+            <th>Category</th>
+        </tr>
+    </thead>
+
+    <tbody id="productList">
+    </tbody>
+
+</table>
+
+<script>
+    loadProducts()
+
+
+    function loadProducts() {
+        var productListEndpoint = "http://localhost:5261/api/Product";
+        var token = JSON.parse(localStorage.getItem("UserResult")).data.token;
+        $("#productList").empty();
+        $.ajax({
+            url: productListEndpoint,
+            type: "GET",
+            headers: {
+                'Authorization': 'Bearer ' + token
+            },
+            success: function (dataProducts) {
+                console.log("Products.....")
+                var productList = $("#productList");
+
+                $.each(dataProducts.data, function (index, product) {
+                    var row = $('<tr>');
+                    $('<td>').text(product.id).appendTo(row);
+                    $('<td>').text(product.description).appendTo(row);
+
+                    var imageData = $('<td>');
+                    $('<img>').attr('src', product.imageUrl).css({'width': '30px', 'height' : '30px'}).appendTo(imageData);
+                    imageData.appendTo(row);
+
+                    //$('<td>').text(product.imageUrl).appendTo(row);
+                    $('<td>').text(product.stock).appendTo(row);
+                    $('<td>').text(product.price).appendTo(row);
+                    $('<td>').text(product.discount).appendTo(row);
+                    $('<td>').text(product.category.description).appendTo(row);
+
+                    productList.append(row);
+                });
+            }
+        });
+    }
+
+
+</script>

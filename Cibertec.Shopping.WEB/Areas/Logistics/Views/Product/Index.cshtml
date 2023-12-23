@@ -1,59 +1,130 @@
 ﻿@{
-    ViewData["Title"] = "Product List";
+    ViewData["title"] = "Products";
 }
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
-<script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
-<link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Description</th>
-            <th>Image</th>
-            <th>Stock</th>
-            <th>Price</th>
-            <th>Discount</th>
-            <th>Category</th>
-        </tr>
-    </thead>
 
-    <tbody id="productList"> 
+<div>
+    <button class="btn btn-primary" id="btnAddProductModal">
+        Add new product
+    </button>
 
-    </tbody>
+    <div class="divProducts">
+    </div>
 
-</table>
+    <!-- Modal -->
+    <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">New Product</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="description">Description:</label>
+                    <input type="text" id="description" name="description" class="form-control" required />
+
+                    <label for="description">Image URL:</label>
+                    <input type="text" id="imageUrl" name="imageUrl" class="form-control" required />
+
+                    <label for="stock">Stock:</label>
+                    <input type="number" id="stock" name="stock" class="form-control" required />
+
+                    <label for="price">Price:</label>
+                    <input type="number" id="price" name="price" class="form-control" required />
+
+                    <label for="stock">Discount %:</label>
+                    <input type="number" id="discount" name="discount" class="form-control" required />
+
+                    <label for="stock">Category:</label>
+                    <select id="category" name="category" class="form-control" required></select>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="btnSaveProduct">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
-    loadProducts()
 
+    loadProductList();
 
-    function loadProducts(){
-        var productListEndpoint = "http://localhost:5261/api/Product";
-        var token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiUGVkcm8gR2FsbGVzZSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6ImdhbGxlc2VAcGVydS5jb20iLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9kYXRlb2ZiaXJ0aCI6IjUvMDMvMTk5MyAwMDowMDowMCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2NvdW50cnkiOiJQRVJVIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiVXNlciIsIlVzZXJJZCI6IjIxIiwibmJmIjoxNzAzMTI4OTc2LCJleHAiOjE3MDMxMjk1NzYsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTI2MSIsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTI2MSJ9.SGbiGfUMA5t44C9yu0WsnO0M_g7-YCy3G3h22rSDrGo";//localStorage.getItem("UserResult").
+    $("#btnSaveProduct").click(function () {
+        let description = $("#description").val();
+        let imageUrl = $("#imageUrl").val();
+        let stock = $("#stock").val();
+        let price = $("#price").val();
+        let discount = $("#discount").val();
+        let categoryId = $("#category").val();
+
+        let productData = {
+            "description": description,
+            "imageUrl": imageUrl,
+            "stock": stock,
+            "price": price,
+            "discount": discount,
+            "categoryId": categoryId
+        }
+
+        console.log(productData);
+        let saveProductEndpoint = "http://localhost:5261/api/Product";
+        let token = JSON.parse(localStorage.getItem("UserResult")).data.token;
+
         $.ajax({
-            url: productListEndpoint,
-            type: "GET",
+            url: saveProductEndpoint,
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(productData),
             headers: {
-                'Authorization': 'Bearer ' + token
+                "Authorization": "Bearer " + token
             },
-            success: function (dataProducts){
-                console.log("Products.....")
-                var productList = $("#productList");
+            success: function(data) {
+                console.log("Product added successfully");
 
-                $.each(dataProducts.data, function(index, product){
-                    var row = $('<tr>');
-                    $('<td>').text(product.id).appendTo(row);
-                    $('<td>').text(product.description).appendTo(row);
-                    $('<td>').text(product.imageUrl).appendTo(row);
-                    $('<td>').text(product.stock).appendTo(row);
-                    $('<td>').text(product.price).appendTo(row);
-                    $('<td>').text(product.discount).appendTo(row);
-                    $('<td>').text(product.category.description).appendTo(row);
-
-                    productList.append(row);
-                });
+                $("#addProductModal").modal("hide");
+                loadProductList();            
+            },
+            error: function(error){
+                console.log("Error adding product : " +  error);
             }
-        });    
+        });
+    });
+
+    $("#btnAddProductModal").click(function () {
+        $("#addProductModal").modal('show');
+    });
+
+    function loadProductList() {
+        var partialViewAction = '@Url.Action("List", "Product", new {area="Logistics"})';
+        $(".divProducts").load(partialViewAction);
+        loadCategories();
+    }
+
+    function loadCategories() {
+        var categoryDropdown = $("#category")
+        var categoryEndpoint = "http://localhost:5261/api/Category";
+
+        $.ajax({
+            url: categoryEndpoint,
+            type: "GET",
+            success: function (dataCategories) {
+
+                $.each(dataCategories.data, function (index, category) {
+                    categoryDropdown.append($('<option>', {
+                        value: category.id,
+                        text: category.description
+                    }));
+                });
+            },
+            error: function (error) {
+                console.error("Error al cargar las categorias....", error);
+            }
+        });
+
+
+
     }
 
 

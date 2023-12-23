@@ -9,5 +9,9 @@ namespace Cibertec.Shopping.WEB.Areas.Logistics.Controllers
         {
             return View();
         }
+
+        public IActionResult List() {
+            return PartialView();
+        }
     }
 }
