@@ -42,7 +42,7 @@ namespace Cibertec.Shopping.WEB.Controllers
                     TempData.Put("UserResult", userResult);
                    
 
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Index", "Home", new { area="Movies"});
                 }            
                                   
                 else               

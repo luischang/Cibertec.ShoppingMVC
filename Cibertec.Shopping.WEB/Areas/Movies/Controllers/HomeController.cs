@@ -17,13 +17,23 @@ namespace Cibertec.Shopping.WEB.Areas.Movies.Controllers
             return View(movies);
         }
 
-        private List<MovieViewModel> GetAllMovies(int page)
+        public IActionResult Favorites(int page = 1)
+        {
+            var favoriteMovies = GetAllMovies(page, true);
+            ViewBag.MaxPages = MaxPages;
+            ViewBag.IsFavorite = favoriteMovies.Any();
+            return View("Index", favoriteMovies);
+        }
+
+        private List<MovieViewModel> GetAllMovies(int page, bool isFavorite = false)
         {
             var movies = new List<MovieViewModel>();
 
             using HttpClient httpClient = new HttpClient();
 
-            var endpointUrl = $"https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&page={page}&sort_by=popularity.desc";
+            var endpointUrl = isFavorite
+                            ? $"https://api.themoviedb.org/3/account/9943299/favorite/movies?language=en-US&page={page}&sort_by=created_at.asc"
+                            : $"https://api.themoviedb.org/3/discover/movie?include_adult=false&include_video=false&language=en-US&page={page}&sort_by=popularity.desc";
 
             var authToken = "Bearer " + apiKey;
 
@@ -31,7 +41,8 @@ namespace Cibertec.Shopping.WEB.Areas.Movies.Controllers
 
             using HttpResponseMessage response = httpClient.GetAsync(endpointUrl).Result;
 
-            if (response.IsSuccessStatusCode) {
+            if (response.IsSuccessStatusCode)
+            {
                 using HttpContent content = response.Content;
 
                 string jsonResult = content.ReadAsStringAsync().Result;
@@ -44,7 +55,7 @@ namespace Cibertec.Shopping.WEB.Areas.Movies.Controllers
                 };
 
                 movies = JsonSerializer.Deserialize<MovieApiResult>(jsonResult, jsonOptions)?.Results;
-            
+
             }
 
             return movies;

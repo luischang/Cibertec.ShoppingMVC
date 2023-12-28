@@ -1,6 +1,8 @@
 ﻿@using Cibertec.Shopping.WEB.Areas.Movies.Models;
 @model List<MovieViewModel>
-
+@{
+    var isFavorite = Convert.ToBoolean(ViewBag.IsFavorite);
+}
 <div class="container mt-5">
 
     <div class="row">
@@ -20,6 +22,10 @@
                         <p class="card-text">
                             Vote Count: @item.VoteCount
                         </p>
+                        @if (!isFavorite)
+                        {
+                            <button class="btn btn-primary btnAddToFavorite" data-movieid="@item.Id">Add to favorite</button>
+                        }
                     </div>
                 </div>
             </div>
@@ -33,10 +39,60 @@
             @for (int i = 1; i <= ViewBag.MaxPages; i++)
             {
                 <li class="page-item">
-                    <a class="page-link" href="@Url.Action("Index", new {page = i})">@i</a>
+                    <a class="page-link" href="@Url.Action(isFavorite ? "Favorites" : "Index", new {page = i})">@i</a>
                 </li>
-            }          
+            }
         </ul>
     </nav>
 
 </div>
+
+<script>
+
+    $(".btnAddToFavorite").click(function () {
+        let movieID = $(this).attr('data-movieid');
+        let endpointURL = 'https://api.themoviedb.org/3/account/9943299/favorite';
+        let token = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJjODRmMmUwODYxM2JmN2FlYTM1OGI0OTgzNDNkMWUwNiIsInN1YiI6IjVmZTUxM2M3ZTE4Yjk3MDAzYzg5NzE3MCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.StJwmra-PsBwZTOXWg3Y06VEu8CGfAo8dXV7ZQ3RnIs';
+        $.ajax({
+            url: endpointURL,
+            type: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            data: JSON.stringify({
+                media_type: 'movie',
+                media_id: movieID,
+                favorite: true
+
+            }),
+            success: function (data) {
+                let messageResponse = data.success
+                    ? "Se agrego como favorita la película satisfactoriamente"
+                    : "No se agregó la pelicula como favorito";
+
+                Swal.fire({
+                    position: "top-end",
+                    icon: "success",
+                    title: messageResponse,
+                    showConfirmButton: false,
+                    timer: 2500
+                });
+
+            },
+            error: function (error) {
+                Swal.fire({
+                    position: "top-end",
+                    icon: "error",
+                    title: "Ocurrió un error al procesar la transacción...",
+                    showConfirmButton: false,
+                    timer: 2500
+                });
+            }
+
+        });
+    });
+
+
+
+</script>
