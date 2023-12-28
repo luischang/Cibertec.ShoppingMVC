@@ -1,0 +1,42 @@
+﻿@using Cibertec.Shopping.WEB.Areas.Movies.Models;
+@model List<MovieViewModel>
+
+<div class="container mt-5">
+
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <img src="https://image.tmdb.org/t/p/w500/@item.PosterPath" class="card-img-top" alt="@item.Title">
+                    <div class="card-body">
+                        <h5 class="card-title">@item.Title</h5>
+                        <p class="card-text">@item.Overview</p>
+
+                        <p class="card-text">
+                            @item.VoteAverage <span class="text-muted">/10</span>
+                        </p>
+
+                        <p class="card-text">
+                            Vote Count: @item.VoteCount
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+            @for (int i = 1; i <= ViewBag.MaxPages; i++)
+            {
+                <li class="page-item">
+                    <a class="page-link" href="@Url.Action("Index", new {page = i})">@i</a>
+                </li>
+            }          
+        </ul>
+    </nav>
+
+</div>

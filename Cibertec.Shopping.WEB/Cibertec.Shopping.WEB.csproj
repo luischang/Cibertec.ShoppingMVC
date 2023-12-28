@@ -17,6 +17,7 @@
     <Folder Include="Areas\HumanResources\Views\" />
     <Folder Include="Areas\Logistics\Data\" />
     <Folder Include="Areas\Logistics\Models\" />
+    <Folder Include="Areas\Movies\Data\" />
   </ItemGroup>
 
 </Project>
